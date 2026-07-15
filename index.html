@@ -122,16 +122,26 @@
               <p>先讓六位學生抽牌，再揭曉任務線索。</p>
             </div>
 
-            <dl id="mission-clues" class="mission-clues" hidden>
-              <div class="mission-clue">
-                <dt><span aria-hidden="true">♙</span> 角色卡性別</dt>
-                <dd id="mission-role-gender"></dd>
-              </div>
-              <div class="mission-clue">
-                <dt><span aria-hidden="true">◇</span> 交通工具卡</dt>
-                <dd id="mission-transport"></dd>
-              </div>
-            </dl>
+            <div id="mission-reveal" class="mission-reveal" hidden>
+              <article class="mission-story" aria-labelledby="mission-story-title">
+                <img id="mission-story-image" class="mission-story-image" alt="" aria-hidden="true">
+                <div class="mission-story-copy">
+                  <h3 id="mission-story-title"></h3>
+                  <p id="mission-story-text"></p>
+                </div>
+              </article>
+
+              <dl id="mission-clues" class="mission-clues">
+                <div class="mission-clue">
+                  <dt><span aria-hidden="true">♙</span> 角色卡性別</dt>
+                  <dd id="mission-role-gender"></dd>
+                </div>
+                <div class="mission-clue">
+                  <dt><span aria-hidden="true">◇</span> 交通工具卡</dt>
+                  <dd id="mission-transport"></dd>
+                </div>
+              </dl>
+            </div>
 
             <p class="mission-explanation">任務中的性別只指角色卡人物，與畫面學生的外觀無關。</p>
 
@@ -300,18 +310,7 @@
                     <span class="token-count" id="word-bank-count">10 個詞</span>
                   </div>
                   <p id="word-bank-instructions" class="builder-instructions">拖曳到問題區，或點選詞彙加入。每個詞只能使用一次。</p>
-                  <div id="word-bank" class="word-bank" data-dropzone="bank" aria-describedby="word-bank-instructions">
-                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="cima" lang="ami" aria-label="將詞彙 cima 加入問題">cima</button>
-                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="ko" lang="ami" aria-label="將詞彙 ko 加入問題">ko</button>
-                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="ngangan" lang="ami" aria-label="將詞彙 ngangan 加入問題">ngangan</button>
-                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="no" lang="ami" aria-label="將詞彙 no 加入問題">no</button>
-                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="miso" lang="ami" aria-label="將詞彙 miso 加入問題">miso</button>
-                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="kiso" lang="ami" aria-label="將詞彙 kiso 加入問題">kiso</button>
-                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="iso" lang="ami" aria-label="將詞彙 iso 加入問題">iso</button>
-                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="pakamaan" lang="ami" aria-label="將詞彙 pakamaan 加入問題">pakamaan</button>
-                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="a" lang="ami" aria-label="將詞彙 a 加入問題">a</button>
-                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="tayni" lang="ami" aria-label="將詞彙 tayni 加入問題">tayni</button>
-                  </div>
+                  <div id="word-bank" class="word-bank" data-dropzone="bank" aria-describedby="word-bank-instructions"></div>
                 </section>
 
                 <section class="sentence-panel" aria-labelledby="sentence-heading">
@@ -461,10 +460,12 @@
 
   <script src="src/core/namespace.js" defer></script>
   <script src="src/data/content.js" defer></script>
+  <script src="src/data/stories.js" defer></script>
   <script src="src/core/random.js" defer></script>
   <script src="src/core/session-seed.js" defer></script>
   <script src="src/core/deal.js" defer></script>
   <script src="src/core/sentence.js" defer></script>
+  <script src="src/core/round-content.js" defer></script>
   <script src="src/core/game-state.js" defer></script>
   <script src="src/game.js" defer></script>
 </body>

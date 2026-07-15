@@ -3,13 +3,14 @@
 
   var app = root.TribalKindnessDetectiveV2;
 
-  if (!app || !app.Content || !app.Deal || !app.Sentence) {
-    throw new Error("Content, Deal and Sentence must be loaded before GameState.");
+  if (!app || !app.Content || !app.Deal || !app.Sentence || !app.RoundContent) {
+    throw new Error("Content, Deal, Sentence and RoundContent must be loaded before GameState.");
   }
 
   var Content = app.Content;
   var Deal = app.Deal;
   var Sentence = app.Sentence;
+  var RoundContent = app.RoundContent;
   var STATUSES = [
     "ready",
     "cards_dealt",
@@ -32,6 +33,7 @@
     var round = 1;
     var internalDeal = null;
     var internalMission = null;
+    var initialTokenOrder = null;
     var listeners = [];
     var state;
 
@@ -49,6 +51,10 @@
     }
 
     function freshState() {
+      initialTokenOrder = RoundContent.createTokenPermutation({
+        seed: baseSeed,
+        round: round
+      });
       return {
         status: "ready",
         round: round,
@@ -68,6 +74,14 @@
 
     function getSnapshot() {
       return copy(state);
+    }
+
+    function getWordBankTokenIds() {
+      var used = new Set(state.sentenceTokenIds);
+
+      return initialTokenOrder.filter(function (tokenId) {
+        return !used.has(tokenId);
+      });
     }
 
     function emit(action) {
@@ -174,6 +188,7 @@
     function drawMission() {
       var invalid = requireStatus("draw_mission", ["cards_dealt"]);
       var transport;
+      var story;
 
       if (invalid) {
         return invalid;
@@ -181,6 +196,10 @@
 
       internalMission = Deal.createMission(internalDeal, { seed: baseSeed, round: round });
       transport = Content.getTransportCard(internalMission.transportCardId);
+      story = RoundContent.selectStory(internalMission.missionId, {
+        seed: baseSeed,
+        round: round
+      });
       state.mission = {
         missionId: internalMission.missionId,
         roleGender: internalMission.roleGender,
@@ -190,6 +209,17 @@
           zh: transport.zh,
           amisStem: transport.amisStem,
           display: transport.display
+        },
+        story: {
+          storyId: story.storyId,
+          combo: story.combo,
+          title: story.title,
+          text: story.text,
+          image: {
+            src: story.image.src,
+            width: story.image.width,
+            height: story.image.height
+          }
         }
       };
       state.status = "mission_revealed";
@@ -414,6 +444,7 @@
       guess: guess,
       restart: restart,
       getSnapshot: getSnapshot,
+      getWordBankTokenIds: getWordBankTokenIds,
       subscribe: subscribe
     });
   }

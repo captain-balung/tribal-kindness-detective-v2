@@ -3,14 +3,15 @@
 
   var app = root.TribalKindnessDetectiveV2;
 
-  if (!app || !app.Content || !app.Sentence || !app.GameState || !app.SessionSeed || typeof document === "undefined") {
+  if (!app || !app.Content || !app.GameState || !app.SessionSeed || typeof document === "undefined") {
     return;
   }
 
   var Content = app.Content;
-  var Sentence = app.Sentence;
   var game = null;
   var dragState = null;
+  var pointerDragState = null;
+  var suppressNextClick = false;
   var dialogOpeners = {};
   var settings = { sound: true, motion: true };
   var systemReducedMotion = typeof root.matchMedia === "function"
@@ -100,7 +101,7 @@
   }
 
   function renderWordBank(snapshot) {
-    var available = Sentence.available(snapshot.sentenceTokenIds);
+    var available = game.getWordBankTokenIds();
     var enabled = canCompose(snapshot.status);
 
     clearChildren(elements.wordBank);
@@ -173,12 +174,24 @@
 
   function renderMission(snapshot) {
     var revealed = Boolean(snapshot.mission);
+    var story = revealed ? snapshot.mission.story : null;
 
     elements.missionPanel.setAttribute("data-mission-state", revealed ? "revealed" : "hidden");
     setHidden(elements.missionPlaceholder, revealed);
-    setHidden(elements.missionClues, !revealed);
+    setHidden(elements.missionReveal, !revealed);
     setText(elements.missionRoleGender, revealed ? snapshot.mission.roleGenderZh + "性角色卡" : "");
     setText(elements.missionTransport, revealed ? snapshot.mission.transport.display : "");
+    setText(elements.missionStoryTitle, story ? story.title : "");
+    setText(elements.missionStoryText, story ? story.text : "");
+    if (story) {
+      elements.missionStoryImage.setAttribute("src", story.image.src);
+      elements.missionStoryImage.setAttribute("width", String(story.image.width));
+      elements.missionStoryImage.setAttribute("height", String(story.image.height));
+    } else {
+      elements.missionStoryImage.removeAttribute("src");
+      elements.missionStoryImage.removeAttribute("width");
+      elements.missionStoryImage.removeAttribute("height");
+    }
     elements.dealCardsButton.disabled = snapshot.status !== "ready";
     elements.drawMissionButton.disabled = snapshot.status !== "cards_dealt";
   }
@@ -595,6 +608,11 @@
   function handleClick(event) {
     var target = event.target.closest("[data-action]");
 
+    if (suppressNextClick) {
+      suppressNextClick = false;
+      event.preventDefault();
+      return;
+    }
     if (!target || target.disabled) {
       return;
     }
@@ -602,6 +620,7 @@
   }
 
   function handleKeydown(event) {
+    var bankToken = event.target.closest(".word-token[data-action='add-token']");
     var label = event.target.closest(".sentence-token-label");
     var item;
     var tokenId;
@@ -609,6 +628,16 @@
     var index;
     var destination;
     var result;
+
+    if (bankToken && !bankToken.disabled && (event.key === "Enter" || event.key === " ")) {
+      event.preventDefault();
+      tokenId = bankToken.getAttribute("data-token-id");
+      result = game.addToken(tokenId);
+      if (result.ok) {
+        focusSoon(elements.sentenceList.querySelector("[data-token-id='" + tokenId + "'] .sentence-token-label"));
+      }
+      return;
+    }
 
     if (!label || label.disabled) {
       return;
@@ -674,41 +703,56 @@
     document.querySelectorAll("[data-dropzone]").forEach(function (dropzone) {
       dropzone.classList.remove("is-drag-over");
     });
+    elements.app.classList.remove("is-pointer-dragging");
+  }
+
+  function applyTokenDrop(payload, dropzone, targetElement) {
+    var targetItem;
+    var snapshot = game.getSnapshot();
+    var targetId;
+    var index;
+    var result;
+
+    if (dropzone.getAttribute("data-dropzone") === "bank") {
+      if (payload.source === "sentence") {
+        result = game.removeToken(payload.tokenId);
+        if (result.ok) {
+          focusSoon(elements.wordBank.querySelector("[data-token-id='" + payload.tokenId + "']"));
+        }
+      }
+      return result;
+    }
+
+    targetItem = targetElement ? targetElement.closest("[data-token-item]") : null;
+    index = snapshot.sentenceTokenIds.length;
+    if (targetItem) {
+      targetId = targetItem.getAttribute("data-token-id");
+      index = snapshot.sentenceTokenIds.indexOf(targetId);
+    }
+
+    if (payload.source === "bank") {
+      result = game.addToken(payload.tokenId, index);
+    } else if (targetId !== payload.tokenId) {
+      if (!targetItem) {
+        index = Math.max(0, snapshot.sentenceTokenIds.length - 1);
+      }
+      result = game.moveToken(payload.tokenId, index);
+    }
+
+    if (result && result.ok) {
+      focusSoon(elements.sentenceList.querySelector("[data-token-id='" + payload.tokenId + "'] .sentence-token-label"));
+    }
+    return result;
   }
 
   function handleDrop(event) {
     var dropzone = event.target.closest("[data-dropzone]");
-    var targetItem;
-    var snapshot;
-    var targetId;
-    var index;
 
     if (!dropzone || !dragState) {
       return;
     }
     event.preventDefault();
-    snapshot = game.getSnapshot();
-
-    if (dropzone.getAttribute("data-dropzone") === "bank") {
-      if (dragState.source === "sentence") {
-        game.removeToken(dragState.tokenId);
-      }
-    } else {
-      targetItem = event.target.closest("[data-token-item]");
-      index = snapshot.sentenceTokenIds.length;
-      if (targetItem) {
-        targetId = targetItem.getAttribute("data-token-id");
-        index = snapshot.sentenceTokenIds.indexOf(targetId);
-      }
-      if (dragState.source === "bank") {
-        game.addToken(dragState.tokenId, index);
-      } else if (targetId !== dragState.tokenId) {
-        if (!targetItem) {
-          index = Math.max(0, snapshot.sentenceTokenIds.length - 1);
-        }
-        game.moveToken(dragState.tokenId, index);
-      }
-    }
+    applyTokenDrop(dragState, dropzone, event.target);
 
     dragState = null;
     clearDragClasses();
@@ -716,6 +760,88 @@
 
   function handleDragEnd() {
     dragState = null;
+    clearDragClasses();
+  }
+
+  function handlePointerDown(event) {
+    var tokenHandle = event.target.closest(".word-token") || event.target.closest(".sentence-token-label");
+    var tokenItem;
+
+    if (!tokenHandle || tokenHandle.disabled || (typeof event.button === "number" && event.button !== 0)) {
+      return;
+    }
+    tokenItem = tokenHandle.closest("[data-token-item]");
+    pointerDragState = {
+      pointerId: event.pointerId,
+      tokenId: tokenItem ? tokenItem.getAttribute("data-token-id") : tokenHandle.getAttribute("data-token-id"),
+      source: tokenItem ? "sentence" : "bank",
+      startX: event.clientX,
+      startY: event.clientY,
+      moved: false
+    };
+  }
+
+  function pointerTarget(event) {
+    if (typeof document.elementFromPoint !== "function") {
+      return event.target;
+    }
+    return document.elementFromPoint(event.clientX, event.clientY) || event.target;
+  }
+
+  function handlePointerMove(event) {
+    var distance;
+    var target;
+    var dropzone;
+
+    if (!pointerDragState || event.pointerId !== pointerDragState.pointerId) {
+      return;
+    }
+    distance = Math.max(
+      Math.abs(event.clientX - pointerDragState.startX),
+      Math.abs(event.clientY - pointerDragState.startY)
+    );
+    if (!pointerDragState.moved && distance < 8) {
+      return;
+    }
+
+    pointerDragState.moved = true;
+    event.preventDefault();
+    clearDragClasses();
+    elements.app.classList.add("is-pointer-dragging");
+    target = pointerTarget(event);
+    dropzone = target && target.closest("[data-dropzone]");
+    if (dropzone) {
+      dropzone.classList.add("is-drag-over");
+    }
+  }
+
+  function handlePointerUp(event) {
+    var target;
+    var dropzone;
+
+    if (!pointerDragState || event.pointerId !== pointerDragState.pointerId) {
+      return;
+    }
+
+    if (pointerDragState.moved) {
+      event.preventDefault();
+      target = pointerTarget(event);
+      dropzone = target && target.closest("[data-dropzone]");
+      if (dropzone) {
+        applyTokenDrop(pointerDragState, dropzone, target);
+      }
+      suppressNextClick = true;
+      if (typeof root.setTimeout === "function") {
+        root.setTimeout(function () { suppressNextClick = false; }, 0);
+      }
+    }
+
+    pointerDragState = null;
+    clearDragClasses();
+  }
+
+  function handlePointerCancel() {
+    pointerDragState = null;
     clearDragClasses();
   }
 
@@ -755,9 +881,13 @@
       startGameButton: byId("start-game-button"),
       missionPanel: byId("mission-panel"),
       missionPlaceholder: byId("mission-placeholder"),
+      missionReveal: byId("mission-reveal"),
       missionClues: byId("mission-clues"),
       missionRoleGender: byId("mission-role-gender"),
       missionTransport: byId("mission-transport"),
+      missionStoryTitle: byId("mission-story-title"),
+      missionStoryText: byId("mission-story-text"),
+      missionStoryImage: byId("mission-story-image"),
       dealCardsButton: byId("deal-cards-button"),
       drawMissionButton: byId("draw-mission-button"),
       selectedHolderLabel: byId("selected-holder-label"),
@@ -811,6 +941,10 @@
     document.addEventListener("dragover", handleDragOver);
     document.addEventListener("drop", handleDrop);
     document.addEventListener("dragend", handleDragEnd);
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("pointermove", handlePointerMove, { passive: false });
+    document.addEventListener("pointerup", handlePointerUp);
+    document.addEventListener("pointercancel", handlePointerCancel);
     document.addEventListener("change", handleChange);
     bindDialogs();
     if (systemReducedMotion && typeof systemReducedMotion.addEventListener === "function") {
