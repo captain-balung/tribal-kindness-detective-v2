@@ -3,14 +3,13 @@
 
   var app = root.TribalKindnessDetectiveV2;
 
-  if (!app || !app.Content || !app.Sentence || !app.GameState || typeof document === "undefined") {
+  if (!app || !app.Content || !app.Sentence || !app.GameState || !app.SessionSeed || typeof document === "undefined") {
     return;
   }
 
   var Content = app.Content;
   var Sentence = app.Sentence;
-  var uiSeed = "tribal-kindness-v2-ui";
-  var game = app.GameState.create({ seed: uiSeed });
+  var game = null;
   var dragState = null;
   var dialogOpeners = {};
   var settings = { sound: true, motion: true };
@@ -791,9 +790,12 @@
   }
 
   function resetForTests(seed) {
+    if (typeof seed === "undefined") {
+      throw new TypeError("resetForTests(seed) requires an explicit fixed seed.");
+    }
+
     closeAllDialogs();
-    uiSeed = String(typeof seed === "undefined" ? "tribal-kindness-v2-ui" : seed);
-    game = app.GameState.create({ seed: uiSeed });
+    game = app.GameState.create({ seed: String(seed) });
     game.subscribe(render);
     showScreen("menu");
     render(game.getSnapshot(), "reset");
@@ -801,6 +803,7 @@
   }
 
   function initialize() {
+    game = app.GameState.create({ seed: app.SessionSeed.create() });
     cacheElements();
     document.addEventListener("click", handleClick);
     document.addEventListener("keydown", handleKeydown);

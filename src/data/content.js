@@ -123,7 +123,7 @@
       zh: "走路",
       amisStem: "rakat",
       display: "走路 rakat",
-      answer: "Pakarakat kako a tayni.",
+      answer: "Rakat sa kako.",
       answerZh: "我抽到的交通工具卡是走路。"
     }
   ];
@@ -203,7 +203,7 @@
       return null;
     }
 
-    return "Paka" + transport.amisStem + " kako a tayni.";
+    return transport.answer;
   }
 
   app.Content = deepFreeze({
