@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light">
+  <meta name="theme-color" content="#073f4b">
+  <meta name="description" content="《部落好心人》第二版：使用十個族語詞彙組句，找出持有任務牌組的學生。">
+  <title>部落好心人 V2｜族語互動偵探遊戲</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <a class="skip-link" href="#main-content">跳到主要內容</a>
+
+  <div id="app" class="app-shell" data-screen-state="menu" data-game-state="ready" data-motion="full">
+    <main id="main-content" tabindex="-1">
+      <section id="menu-screen" class="screen menu-screen" data-screen="menu" aria-labelledby="game-title">
+        <div class="menu-atmosphere" aria-hidden="true">
+          <span class="sun-halo"></span>
+          <span class="light-ribbon light-ribbon-one"></span>
+          <span class="light-ribbon light-ribbon-two"></span>
+          <span class="floating-spark spark-one"></span>
+          <span class="floating-spark spark-two"></span>
+          <span class="floating-spark spark-three"></span>
+        </div>
+
+        <div class="menu-stage">
+          <div class="menu-emblem" aria-hidden="true">
+            <span class="emblem-lens"></span>
+            <span class="emblem-card emblem-card-left"></span>
+            <span class="emblem-card emblem-card-right"></span>
+          </div>
+
+          <div class="title-plaque">
+            <p class="title-kicker">族語互動偵探遊戲 · 第二版</p>
+            <h1 id="game-title">部落好心人</h1>
+            <p class="title-subtitle">組出正確問句，解開兩張牌的祕密</p>
+            <p class="language-note">族語內容已由族語老師確認</p>
+          </div>
+
+          <nav class="menu-actions" aria-label="主選單">
+            <button id="start-game-button" class="ornate-button ornate-button-primary" type="button" data-action="start-game">
+              <span class="button-jewel" aria-hidden="true"></span>
+              <span class="button-copy">
+                <strong>開始調查</strong>
+                <small>抽牌、組句，找出正確持卡學生</small>
+              </span>
+            </button>
+            <button id="rules-button" class="ornate-button ornate-button-secondary" type="button" data-action="open-dialog" data-dialog-open="rules-dialog">
+              <span class="button-jewel" aria-hidden="true"></span>
+              <span class="button-copy">
+                <strong>遊戲說明</strong>
+                <small>認識持卡者、角色卡與交通工具卡</small>
+              </span>
+            </button>
+            <button id="settings-button" class="ornate-button ornate-button-tertiary" type="button" data-action="open-dialog" data-dialog-open="settings-dialog">
+              <span class="button-jewel" aria-hidden="true"></span>
+              <span class="button-copy">
+                <strong>遊戲設定</strong>
+                <small>調整介面音效與裝飾動畫</small>
+              </span>
+            </button>
+          </nav>
+
+          <div class="menu-feature" aria-label="第二版特色">
+            <span aria-hidden="true">✦</span>
+            <p><strong>十詞組句新玩法</strong><small>可拖曳，也能用點選與鍵盤操作</small></p>
+          </div>
+        </div>
+
+        <p class="menu-footnote">每位學生會依手上的卡牌回答，不是回答自己的姓名或交通方式。</p>
+      </section>
+
+      <section id="game-screen" class="screen game-screen" data-screen="game" aria-labelledby="play-heading" hidden>
+        <div class="game-backdrop" aria-hidden="true"></div>
+
+        <header class="game-header">
+          <div class="compact-brand">
+            <span class="brand-seal" aria-hidden="true">?</span>
+            <span>
+              <small>族語互動偵探遊戲 V2</small>
+              <strong id="play-heading">部落好心人</strong>
+            </span>
+          </div>
+
+          <ol id="progress-steps" class="progress-steps" aria-label="遊戲進度">
+            <li id="step-deal" class="progress-step is-current" data-step="deal" aria-current="step">
+              <span class="step-number">1</span><span class="step-label">抽牌</span>
+            </li>
+            <li id="step-mission" class="progress-step" data-step="mission">
+              <span class="step-number">2</span><span class="step-label">任務</span>
+            </li>
+            <li id="step-question" class="progress-step" data-step="question">
+              <span class="step-number">3</span><span class="step-label">組句</span>
+            </li>
+            <li id="step-guess" class="progress-step" data-step="guess">
+              <span class="step-number">4</span><span class="step-label">推理</span>
+            </li>
+          </ol>
+
+          <div class="header-actions" aria-label="遊戲控制">
+            <button id="restart-button" class="header-button" type="button" data-action="restart" aria-label="重新開始一局">
+              <span aria-hidden="true">↻</span><span class="header-button-text">重新開始</span>
+            </button>
+            <button id="pause-button" class="round-button" type="button" data-action="open-dialog" data-dialog-open="pause-dialog" aria-label="暫停遊戲">
+              <span aria-hidden="true">Ⅱ</span>
+            </button>
+            <button id="game-settings-button" class="round-button" type="button" data-action="open-dialog" data-dialog-open="settings-dialog" aria-label="開啟遊戲設定">
+              <span aria-hidden="true">⚙</span>
+            </button>
+          </div>
+        </header>
+
+        <div class="game-layout">
+          <aside id="mission-panel" class="mission-panel ornate-panel" data-mission-state="hidden" aria-labelledby="mission-heading">
+            <div class="panel-crown" aria-hidden="true"><span></span></div>
+            <p class="panel-kicker">今日祕密任務</p>
+            <h2 id="mission-heading">找出正確的持卡學生</h2>
+
+            <div id="mission-placeholder" class="mission-placeholder">
+              <span class="mystery-orb" aria-hidden="true">?</span>
+              <p>先讓六位學生抽牌，再揭曉任務線索。</p>
+            </div>
+
+            <dl id="mission-clues" class="mission-clues" hidden>
+              <div class="mission-clue">
+                <dt><span aria-hidden="true">♙</span> 角色卡性別</dt>
+                <dd id="mission-role-gender"></dd>
+              </div>
+              <div class="mission-clue">
+                <dt><span aria-hidden="true">◇</span> 交通工具卡</dt>
+                <dd id="mission-transport"></dd>
+              </div>
+            </dl>
+
+            <p class="mission-explanation">任務中的性別只指角色卡人物，與畫面學生的外觀無關。</p>
+
+            <div class="mission-actions">
+              <button id="deal-cards-button" class="action-button action-button-gold" type="button" data-action="deal-cards">
+                <span aria-hidden="true">▱</span> 抽牌
+              </button>
+              <button id="draw-mission-button" class="action-button action-button-coral" type="button" data-action="draw-mission" disabled>
+                <span aria-hidden="true">✦</span> 抽任務卡
+              </button>
+            </div>
+          </aside>
+
+          <div class="play-column">
+            <section class="holders-section ornate-panel" aria-labelledby="holders-heading">
+              <div class="section-heading-row">
+                <div>
+                  <p class="section-kicker">六位持卡者</p>
+                  <h2 id="holders-heading">選擇一位持卡學生</h2>
+                </div>
+                <p id="holders-hint" class="section-hint">學生會依自己手中的角色卡與交通工具卡回答。</p>
+              </div>
+
+              <div id="holder-grid" class="holder-grid" aria-describedby="holders-hint">
+                <article class="holder-card" data-holder-card="holder-1" data-visual-state="empty">
+                  <button class="holder-select-button" type="button" data-action="select-holder" data-holder-id="holder-1" aria-label="選擇持卡學生 1，目前空手" disabled>
+                    <span class="holder-frame">
+                      <span class="holder-portrait holder-visual-a" aria-hidden="true">
+                        <span class="holder-art holder-art-empty"></span>
+                        <span class="holder-art holder-art-holding"></span>
+                        <span class="face-up-layer" data-face-up-layer hidden>
+                          <span class="face-up-card face-up-card-first" data-face-up-slot="first"></span>
+                          <span class="face-up-card face-up-card-second" data-face-up-slot="second"></span>
+                        </span>
+                      </span>
+                      <span class="selection-badge" data-selection-badge hidden>已選</span>
+                    </span>
+                    <span class="holder-meta">
+                      <strong>持卡學生 1</strong>
+                      <span class="holder-state" data-holder-state>空手等待抽牌</span>
+                      <span class="visually-hidden" data-card-status hidden></span>
+                    </span>
+                  </button>
+                </article>
+
+                <article class="holder-card" data-holder-card="holder-2" data-visual-state="empty">
+                  <button class="holder-select-button" type="button" data-action="select-holder" data-holder-id="holder-2" aria-label="選擇持卡學生 2，目前空手" disabled>
+                    <span class="holder-frame">
+                      <span class="holder-portrait holder-visual-b" aria-hidden="true">
+                        <span class="holder-art holder-art-empty"></span>
+                        <span class="holder-art holder-art-holding"></span>
+                        <span class="face-up-layer" data-face-up-layer hidden>
+                          <span class="face-up-card face-up-card-first" data-face-up-slot="first"></span>
+                          <span class="face-up-card face-up-card-second" data-face-up-slot="second"></span>
+                        </span>
+                      </span>
+                      <span class="selection-badge" data-selection-badge hidden>已選</span>
+                    </span>
+                    <span class="holder-meta">
+                      <strong>持卡學生 2</strong>
+                      <span class="holder-state" data-holder-state>空手等待抽牌</span>
+                      <span class="visually-hidden" data-card-status hidden></span>
+                    </span>
+                  </button>
+                </article>
+
+                <article class="holder-card" data-holder-card="holder-3" data-visual-state="empty">
+                  <button class="holder-select-button" type="button" data-action="select-holder" data-holder-id="holder-3" aria-label="選擇持卡學生 3，目前空手" disabled>
+                    <span class="holder-frame">
+                      <span class="holder-portrait holder-visual-c" aria-hidden="true">
+                        <span class="holder-art holder-art-empty"></span>
+                        <span class="holder-art holder-art-holding"></span>
+                        <span class="face-up-layer" data-face-up-layer hidden>
+                          <span class="face-up-card face-up-card-first" data-face-up-slot="first"></span>
+                          <span class="face-up-card face-up-card-second" data-face-up-slot="second"></span>
+                        </span>
+                      </span>
+                      <span class="selection-badge" data-selection-badge hidden>已選</span>
+                    </span>
+                    <span class="holder-meta">
+                      <strong>持卡學生 3</strong>
+                      <span class="holder-state" data-holder-state>空手等待抽牌</span>
+                      <span class="visually-hidden" data-card-status hidden></span>
+                    </span>
+                  </button>
+                </article>
+
+                <article class="holder-card" data-holder-card="holder-4" data-visual-state="empty">
+                  <button class="holder-select-button" type="button" data-action="select-holder" data-holder-id="holder-4" aria-label="選擇持卡學生 4，目前空手" disabled>
+                    <span class="holder-frame">
+                      <span class="holder-portrait holder-visual-d" aria-hidden="true">
+                        <span class="holder-art holder-art-empty"></span>
+                        <span class="holder-art holder-art-holding"></span>
+                        <span class="face-up-layer" data-face-up-layer hidden>
+                          <span class="face-up-card face-up-card-first" data-face-up-slot="first"></span>
+                          <span class="face-up-card face-up-card-second" data-face-up-slot="second"></span>
+                        </span>
+                      </span>
+                      <span class="selection-badge" data-selection-badge hidden>已選</span>
+                    </span>
+                    <span class="holder-meta">
+                      <strong>持卡學生 4</strong>
+                      <span class="holder-state" data-holder-state>空手等待抽牌</span>
+                      <span class="visually-hidden" data-card-status hidden></span>
+                    </span>
+                  </button>
+                </article>
+
+                <article class="holder-card" data-holder-card="holder-5" data-visual-state="empty">
+                  <button class="holder-select-button" type="button" data-action="select-holder" data-holder-id="holder-5" aria-label="選擇持卡學生 5，目前空手" disabled>
+                    <span class="holder-frame">
+                      <span class="holder-portrait holder-visual-e" aria-hidden="true">
+                        <span class="holder-art holder-art-empty"></span>
+                        <span class="holder-art holder-art-holding"></span>
+                        <span class="face-up-layer" data-face-up-layer hidden>
+                          <span class="face-up-card face-up-card-first" data-face-up-slot="first"></span>
+                          <span class="face-up-card face-up-card-second" data-face-up-slot="second"></span>
+                        </span>
+                      </span>
+                      <span class="selection-badge" data-selection-badge hidden>已選</span>
+                    </span>
+                    <span class="holder-meta">
+                      <strong>持卡學生 5</strong>
+                      <span class="holder-state" data-holder-state>空手等待抽牌</span>
+                      <span class="visually-hidden" data-card-status hidden></span>
+                    </span>
+                  </button>
+                </article>
+
+                <article class="holder-card" data-holder-card="holder-6" data-visual-state="empty">
+                  <button class="holder-select-button" type="button" data-action="select-holder" data-holder-id="holder-6" aria-label="選擇持卡學生 6，目前空手" disabled>
+                    <span class="holder-frame">
+                      <span class="holder-portrait holder-visual-f" aria-hidden="true">
+                        <span class="holder-art holder-art-empty"></span>
+                        <span class="holder-art holder-art-holding"></span>
+                        <span class="face-up-layer" data-face-up-layer hidden>
+                          <span class="face-up-card face-up-card-first" data-face-up-slot="first"></span>
+                          <span class="face-up-card face-up-card-second" data-face-up-slot="second"></span>
+                        </span>
+                      </span>
+                      <span class="selection-badge" data-selection-badge hidden>已選</span>
+                    </span>
+                    <span class="holder-meta">
+                      <strong>持卡學生 6</strong>
+                      <span class="holder-state" data-holder-state>空手等待抽牌</span>
+                      <span class="visually-hidden" data-card-status hidden></span>
+                    </span>
+                  </button>
+                </article>
+              </div>
+            </section>
+
+            <section id="question-workbench" class="question-workbench ornate-panel" aria-labelledby="question-heading">
+              <div class="workbench-heading">
+                <div>
+                  <p class="section-kicker">族語組句工作台</p>
+                  <h2 id="question-heading">把詞彙排成問題</h2>
+                </div>
+                <p class="selected-holder-display"><span>目前詢問</span><strong id="selected-holder-label">尚未選擇持卡學生</strong></p>
+              </div>
+
+              <div class="builder-grid">
+                <section class="word-bank-panel" aria-labelledby="word-bank-heading">
+                  <div class="subheading-row">
+                    <h3 id="word-bank-heading">詞彙庫</h3>
+                    <span class="token-count" id="word-bank-count">10 個詞</span>
+                  </div>
+                  <p id="word-bank-instructions" class="builder-instructions">拖曳到問題區，或點選詞彙加入。每個詞只能使用一次。</p>
+                  <div id="word-bank" class="word-bank" data-dropzone="bank" aria-describedby="word-bank-instructions">
+                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="cima" lang="ami" aria-label="將詞彙 cima 加入問題">cima</button>
+                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="ko" lang="ami" aria-label="將詞彙 ko 加入問題">ko</button>
+                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="ngangan" lang="ami" aria-label="將詞彙 ngangan 加入問題">ngangan</button>
+                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="no" lang="ami" aria-label="將詞彙 no 加入問題">no</button>
+                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="miso" lang="ami" aria-label="將詞彙 miso 加入問題">miso</button>
+                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="kiso" lang="ami" aria-label="將詞彙 kiso 加入問題">kiso</button>
+                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="iso" lang="ami" aria-label="將詞彙 iso 加入問題">iso</button>
+                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="pakamaan" lang="ami" aria-label="將詞彙 pakamaan 加入問題">pakamaan</button>
+                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="a" lang="ami" aria-label="將詞彙 a 加入問題">a</button>
+                    <button class="word-token" type="button" draggable="true" data-action="add-token" data-token-id="tayni" lang="ami" aria-label="將詞彙 tayni 加入問題">tayni</button>
+                  </div>
+                </section>
+
+                <section class="sentence-panel" aria-labelledby="sentence-heading">
+                  <div class="subheading-row">
+                    <h3 id="sentence-heading">問題組句區</h3>
+                    <button id="clear-sentence-button" class="text-button" type="button" data-action="clear-sentence" disabled>清除全部</button>
+                  </div>
+                  <p id="sentence-instructions" class="builder-instructions">句中詞彙可拖曳重排；也可使用每個詞旁的左移、右移與移除控制。</p>
+                  <div id="sentence-dropzone" class="sentence-dropzone" data-dropzone="sentence" tabindex="0" role="group" aria-labelledby="sentence-heading" aria-describedby="sentence-instructions sentence-empty-hint">
+                    <ol id="sentence-token-list" class="sentence-token-list"></ol>
+                    <p id="sentence-empty-hint" class="sentence-empty-hint">把詞彙放到這裡</p>
+                  </div>
+
+                  <div class="sentence-preview-wrap">
+                    <span class="preview-label">問題預覽</span>
+                    <output id="sentence-preview" class="sentence-preview" lang="ami" aria-live="polite">尚未組句</output>
+                  </div>
+
+                  <button id="submit-question-button" class="submit-question-button" type="button" data-action="submit-question" disabled>
+                    <span aria-hidden="true">✦</span>
+                    <span><strong>提出問題</strong><small>送出後才會判斷詞序</small></span>
+                  </button>
+                </section>
+              </div>
+
+              <div class="answer-and-guess">
+                <section id="answer-panel" class="answer-panel" aria-labelledby="answer-heading" aria-live="polite">
+                  <div class="answer-icon" aria-hidden="true">…</div>
+                  <div>
+                    <h3 id="answer-heading">調查紀錄</h3>
+                    <p id="asked-question" class="asked-question" lang="ami"></p>
+                    <p id="answer-amis" class="answer-amis" lang="ami"></p>
+                    <p id="answer-zh" class="answer-zh">選擇學生、排好詞彙，再送出問題。</p>
+                  </div>
+                </section>
+
+                <div class="guess-panel" data-guess-state="inactive">
+                  <p id="guess-instructions">蒐集足夠線索後，進入猜測模式並選擇一位持卡學生。</p>
+                  <div class="guess-actions">
+                    <button id="guess-mode-button" class="guess-button" type="button" data-action="enter-guessing" aria-pressed="false" disabled>
+                      <span aria-hidden="true">⌕</span><span>我要猜答案</span>
+                    </button>
+                    <button id="leave-guess-button" class="secondary-button" type="button" data-action="leave-guessing" hidden>返回組句調查</button>
+                  </div>
+                </div>
+              </div>
+            </section>
+          </div>
+        </div>
+
+        <div id="feedback-toast" class="feedback-toast" role="status" aria-live="polite" aria-atomic="true"></div>
+      </section>
+    </main>
+
+    <dialog id="rules-dialog" class="game-dialog" aria-labelledby="rules-heading">
+      <div class="dialog-frame">
+        <header class="dialog-header">
+          <div><p class="panel-kicker">調查手冊</p><h2 id="rules-heading">遊戲說明</h2></div>
+          <button class="dialog-close-button" type="button" data-action="close-dialog" data-dialog-close aria-label="關閉遊戲說明">×</button>
+        </header>
+        <div class="dialog-body">
+          <ol class="rule-steps">
+            <li><span>1</span><div><strong>抽兩張牌</strong><p>六位學生會從空手切換成手持角色卡與交通工具卡的蓋牌狀態。</p></div></li>
+            <li><span>2</span><div><strong>揭曉任務</strong><p>任務只看角色卡人物的性別與交通工具卡，不看持卡學生外觀。</p></div></li>
+            <li><span>3</span><div><strong>選人組句</strong><p>選擇持卡學生，再用十個唯一詞彙排列問題；學生依手上的牌回答。</p></div></li>
+            <li><span>4</span><div><strong>推理揭牌</strong><p>猜錯可繼續調查；猜對只翻開正確學生手中的兩張牌。</p></div></li>
+          </ol>
+          <div class="interaction-callout">
+            <h3>不用拖曳也能玩</h3>
+            <p>點選詞彙即可加入問題。句中每個詞都提供左移、右移及移除按鈕，鍵盤與觸控都能完整操作。</p>
+          </div>
+          <p class="review-callout"><strong>族語內容已由族語老師確認。</strong>本遊戲不提供語音播放，也不使用語音合成。</p>
+        </div>
+        <footer class="dialog-footer">
+          <button class="primary-dialog-button" type="button" data-action="close-dialog" data-dialog-close>我知道了</button>
+        </footer>
+      </div>
+    </dialog>
+
+    <dialog id="settings-dialog" class="game-dialog compact-dialog" aria-labelledby="settings-heading">
+      <div class="dialog-frame">
+        <header class="dialog-header">
+          <div><p class="panel-kicker">個人設定</p><h2 id="settings-heading">遊戲設定</h2></div>
+          <button class="dialog-close-button" type="button" data-action="close-dialog" data-dialog-close aria-label="關閉遊戲設定">×</button>
+        </header>
+        <div class="dialog-body">
+          <div class="settings-list">
+            <label class="setting-row" for="sound-setting">
+              <span><strong>介面音效</strong><small>只播放操作提示聲，不包含族語或其他語音。</small></span>
+              <input id="sound-setting" type="checkbox" data-setting="sound" checked>
+            </label>
+            <label class="setting-row" for="motion-setting">
+              <span><strong>裝飾動畫</strong><small>關閉後會停止光點、翻牌與介面轉場。</small></span>
+              <input id="motion-setting" type="checkbox" data-setting="motion" checked>
+            </label>
+          </div>
+          <p class="settings-note">系統也會自動尊重裝置的「減少動態效果」設定。</p>
+        </div>
+        <footer class="dialog-footer">
+          <button class="primary-dialog-button" type="button" data-action="close-dialog" data-dialog-close>完成</button>
+        </footer>
+      </div>
+    </dialog>
+
+    <dialog id="pause-dialog" class="game-dialog compact-dialog" aria-labelledby="pause-heading">
+      <div class="dialog-frame pause-frame">
+        <div class="pause-medallion" aria-hidden="true">Ⅱ</div>
+        <div class="dialog-body pause-body">
+          <p class="panel-kicker">調查暫停</p>
+          <h2 id="pause-heading">先休息一下</h2>
+          <p>目前的卡牌、任務與組句都會保留。</p>
+        </div>
+        <footer class="dialog-footer dialog-footer-split">
+          <button class="quiet-button" type="button" data-action="return-menu">回到主選單</button>
+          <button class="primary-dialog-button" type="button" data-action="close-dialog" data-dialog-close>繼續調查</button>
+        </footer>
+      </div>
+    </dialog>
+
+    <dialog id="success-dialog" class="game-dialog success-dialog" aria-labelledby="success-heading">
+      <div class="dialog-frame">
+        <div class="success-rays" aria-hidden="true"></div>
+        <div class="success-medal" aria-hidden="true">★</div>
+        <div class="success-heading">
+          <p class="panel-kicker">任務完成</p>
+          <h2 id="success-heading">找到了！</h2>
+          <p id="success-holder-label">正確持卡學生的兩張牌已翻開。</p>
+        </div>
+        <div class="success-reveal" data-success-reveal>
+          <div class="success-result" data-success-slot="first"></div>
+          <div class="success-result" data-success-slot="second"></div>
+        </div>
+        <p class="language-note">族語內容已由族語老師確認</p>
+        <footer class="dialog-footer dialog-footer-split">
+          <button class="quiet-button" type="button" data-action="return-menu">回到主選單</button>
+          <button id="play-again-button" class="primary-dialog-button" type="button" data-action="play-again">再玩一局</button>
+        </footer>
+      </div>
+    </dialog>
+
+    <div id="status-live" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div id="alert-live" class="visually-hidden" role="alert" aria-live="assertive" aria-atomic="true"></div>
+    <div id="sentence-live" class="visually-hidden" role="status" aria-live="polite" aria-atomic="true"></div>
+  </div>
+
+  <noscript><p class="noscript-message">這個遊戲需要 JavaScript 才能進行組句與推理。</p></noscript>
+
+  <script src="src/core/namespace.js" defer></script>
+  <script src="src/data/content.js" defer></script>
+  <script src="src/core/random.js" defer></script>
+  <script src="src/core/deal.js" defer></script>
+  <script src="src/core/sentence.js" defer></script>
+  <script src="src/core/game-state.js" defer></script>
+  <script src="src/game.js" defer></script>
+</body>
+</html>
